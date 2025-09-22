@@ -129,6 +129,8 @@ pipeline {
         // 'always' ensures these steps run regardless of the build's success or failure.
         always {
             script {
+				// Add this line for debugging
+				echo "DEBUG: Suite name at start of post-build is '${env.SUITE_TO_RUN}'"
 				// Use the 'inside' step to run all cleanup, reporting, and notifications inside our container.
 				// This is needed because we're using 'agent none' at the top level.
                 docker.image('flight-booking-agent:latest').inside('-u root -v /var/run/docker.sock:/var/run/docker.sock --entrypoint=""') {
