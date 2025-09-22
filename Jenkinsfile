@@ -38,23 +38,44 @@ pipeline {
         stage('Determine Trigger Type & Suite') {
             agent any
             steps {
-                script {
-                    def cause = currentBuild.getBuildCauses()[0]
-                    echo "🔍 Build was triggered by: ${cause.shortDescription}"
-
-                    if (cause instanceof hudson.triggers.TimerTrigger$TimerTriggerCause) {
-                        // If triggered by the cron timer, it's a regression run.
-                        env.SUITE_TO_RUN = 'regression'
-                    } else if (cause instanceof hudson.model.Cause$UserIdCause) {
-                        // If a user started it manually, respect their parameter choice.
-                        env.SUITE_TO_RUN = params.SUITE_NAME
-                    } else {
-                        // For all other triggers (like a git push), default to a quick smoke test.
-                        env.SUITE_TO_RUN = 'smoke'
-                    }
-
-                    echo "✅ Pipeline will run the '${env.SUITE_TO_RUN}' suite."
-                }
+//                script {
+//                    def cause = currentBuild.getBuildCauses()[0]
+//                    echo "🔍 Build was triggered by: ${cause.shortDescription}"
+//
+//                    if (cause instanceof hudson.triggers.TimerTrigger$TimerTriggerCause) {
+//                        // If triggered by the cron timer, it's a regression run.
+//                        env.SUITE_TO_RUN = 'regression'
+//                    } else if (cause instanceof hudson.model.Cause$UserIdCause) {
+//                        // If a user started it manually, respect their parameter choice.
+//                        env.SUITE_TO_RUN = params.SUITE_NAME
+//                    } else {
+//                        // For all other triggers (like a git push), default to a quick smoke test.
+//                        env.SUITE_TO_RUN = 'smoke'
+//                    }
+//
+//                    echo "✅ Pipeline will run the '${env.SUITE_TO_RUN}' suite."
+//                }
+				script {
+					def causes = currentBuild.getBuildCauses()
+					// This will now print all trigger descriptions, e.g., "Branch indexing, Started by user..."
+					echo "🔍 Build was triggered by: ${causes*.shortDescription.join(', ')}"
+				
+					// Use .any{} to search the entire list of causes
+					def isManualTrigger = causes.any { it instanceof hudson.model.Cause$UserIdCause }
+					def isTimerTrigger = causes.any { it instanceof hudson.triggers.TimerTrigger$TimerTriggerCause }
+				
+					if (isTimerTrigger) {
+						suiteToRun = 'regression'
+					} else if (isManualTrigger) {
+						suiteToRun = params.SUITE_NAME
+					} else {
+						// Default for all other triggers (like a git push)
+						suiteToRun = 'smoke'
+					}
+				
+					// This will now correctly reflect the user's choice
+					echo "✅ Pipeline will run the '${suiteToRun}' suite."
+				}
             }
         }
 
