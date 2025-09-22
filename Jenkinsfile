@@ -1,167 +1,199 @@
 @Library('my-automation-library') _
 
-pipeline
-{
-	agent none
+pipeline {
+    // ✅ We define no top-level agent. This enables a flexible multi-agent
+    // strategy where each stage can use its own specialized environment.
+    agent none 
 
-	options
-	{
-		skipDefaultCheckout()
-	}
+    options {
+        // ✅ Prevents Jenkins from doing an initial checkout on the controller.
+        // We will handle the checkout manually inside the correct agent.
+        skipDefaultCheckout()
+    }
 
-	parameters
-	{
-		choice(name: 'TARGET_ENVIRONMENT', choices: ['PRODUCTION', 'STAGING', 'QA'], description: 'Select environment')
-		string(name: 'QASE_TEST_CASE_IDS', defaultValue: '[2]', description: 'Comma-separated Qase Test Case IDs')
-	}
+    triggers {
+        // ✅ Automatically schedules a build to run every night at approximately 2 AM.
+        // This trigger will be identified by the pipeline to run the 'regression' suite.
+        cron('H 2 * * *')
+    }
 
-	stages
-	{
-		stage('Initialize & Start Grid')
-		{
-			// This stage only runs on the 'enhancements' branch
-			when { branch 'enhancements' }
-			agent
-			{
-				docker
-				{
-					image 'flight-booking-agent:latest'
-					args '-u root -v /var/run/docker.sock:/var/run/docker.sock --entrypoint=""'
-				}
-			}
-			steps
-			{
-				cleanWs()
-				checkout scm
-				printBuildMetadata('smoke')
-				echo '📦 Starting Docker-based Selenium Grid...'
-				// Using your retry logic with the shared library function
-				retry(2)
-				{
-					startDockerGrid('docker-compose-grid.yml', 20)
-				}
-			}
-		}
+    parameters {
+        // ✅ This parameter is now ONLY for manual builds. Automated runs will ignore it.
+        choice(name: 'SUITE_NAME', choices: ['smoke', 'regression'], description: 'Select suite (only applies to manual runs).')
 
-		stage('Build & Run Smoke Tests')
-		{
-			when { branch 'enhancements' }
-			agent
-			{
-				docker
-				{
-					image 'flight-booking-agent:latest'
-					args '-u root -v /var/run/docker.sock:/var/run/docker.sock --entrypoint="" --network=selenium_grid_network'
-				}
-			}
-			steps
-			{
-				echo "🧪 Running smoke tests on: ${params.TARGET_ENVIRONMENT}"
-				script
-				{
-					parallel(
-							Chrome:
-							{
-								echo '🧪 Running Smoke tests on Chrome...'
-								sh """
-                                mvn clean test \
-                                -P smoke \
-                                -Denv=${params.TARGET_ENVIRONMENT} \
-                                -Dtest.suite=smoke \
-                                -Dbrowser=CHROME \
-                                -Dreport.dir=chrome \
-                                -Dbrowser.headless=true \
-                                -Dmaven.repo.local=.m2-chrome
-                            """
-							},
-							Firefox:
-							{
-								echo '🧪 Running Smoke tests on Firefox...'
-								sh """
-                                mvn clean test \
-                                -P smoke \
-                                -Denv=${params.TARGET_ENVIRONMENT} \
-                                -Dtest.suite=smoke \
-                                -Dbrowser=FIREFOX \
-                                -Dreport.dir=firefox \
-                                -Dbrowser.headless=true \
-                                -Dmaven.repo.local=.m2-firefox
-                            """
-							}
-							)
-				}
-			}
-		}
-	}
+        // ✅ The target environment for test execution.
+        choice(name: 'TARGET_ENVIRONMENT', choices: ['PRODUCTION', 'STAGING', 'QA'], description: 'Select test environment.')
 
-	post
-	{
-		always
-		{
-			script
-			{
-				docker.image('flight-booking-agent:latest').inside('-u root -v /var/run/docker.sock:/var/run/docker.sock --entrypoint=""')
-				{
-					// Conditionally stop the grid only on the target branch
-					if (env.BRANCH_NAME == 'enhancements')
-					{
-						echo '🧹 Tearing down Selenium Grid...'
-						stopDockerGrid('docker-compose-grid.yml')
-					}
+        // ✅ An optional manual approval gate, used only by the regression suite.
+        booleanParam(name: 'MANUAL_APPROVAL', defaultValue: false, description: '🛑 Only relevant if "regression" is selected. Ignored for "smoke".')
 
-					echo '📦 Archiving and publishing reports...'
-					generateDashboard("smoke", "${env.BUILD_NUMBER}")
-					archiveAndPublishReports()
+        // ✅ An optional override for Qase test case IDs.
+        string(name: 'QASE_TEST_CASE_IDS', defaultValue: '', description: 'Optional: Override default Qase IDs.')
+    }
 
-					if (env.BRANCH_NAME == 'enhancements')
-					{
-						try
-						{
-							updateQase(
-									projectCode: 'FB',
-									credentialsId: 'qase-api-token',
-									testCaseIds: params.QASE_TEST_CASE_IDS
-									)
-							sendBuildSummaryEmail(
-									suiteName: 'smoke',
-									emailCredsId: 'recipient-email-list'
-									)
-						} catch (err)
-						{
-							echo "⚠️ Post-build notification actions failed: ${err.getMessage()}"
-						}
-					}else
-					{
-						echo "ℹ️ Skipping notifications for branch: ${env.BRANCH_NAME}"
-					}
-				}
-			}
-		}
+    stages {
 
-		failure
-		{
-			script
-			{
-				docker.image('flight-booking-agent:latest').inside('-u root -v /var/run/docker.sock:/var/run/docker.sock --entrypoint=""')
-				{
-					echo '⚠️ Build failed. Checking for running Selenium containers...'
-					try
-					{
-						def result = sh(script: 'docker ps -a --filter "name=selenium" --format "{{.Names}}"', returnStdout: true).trim()
-						if (result)
-						{
-							echo "🛑 Stopping containers:\n${result}"
-							stopDockerGrid('docker-compose-grid.yml')
-						} else
-						{
-							echo "✅ No active Selenium containers to stop."
-						}
-					} catch (e)
-					{
-						echo "⚠️ Docker cleanup error: ${e.getMessage()}"
-					}
-				}
-			}
-		}
-	}
+        // This initial stage runs on a lightweight agent to determine which suite to run.
+        // This is a safe and robust pattern that avoids running complex logic in unsupported places.
+        stage('Determine Trigger Type & Suite') {
+            agent any
+            steps {
+                script {
+                    def cause = currentBuild.getBuildCauses()[0]
+                    echo "🔍 Build was triggered by: ${cause.shortDescription}"
+
+                    if (cause instanceof hudson.triggers.TimerTrigger$TimerTriggerCause) {
+                        // If triggered by the cron timer, it's a regression run.
+                        env.SUITE_TO_RUN = 'regression'
+                    } else if (cause instanceof hudson.model.Cause$UserIdCause) {
+                        // If a user started it manually, respect their parameter choice.
+                        env.SUITE_TO_RUN = params.SUITE_NAME
+                    } else {
+                        // For all other triggers (like a git push), default to a quick smoke test.
+                        env.SUITE_TO_RUN = 'smoke'
+                    }
+
+                    echo "✅ Pipeline will run the '${env.SUITE_TO_RUN}' suite."
+                }
+            }
+        }
+
+        // This stage prepares the environment by starting the Selenium Grid.
+        stage('Initialize & Start Grid') {
+            when { branch 'enhancements' }
+            agent {
+                docker {
+                    image 'flight-booking-agent:latest'
+                    args '-u root -v /var/run/docker.sock:/var/run/docker.sock --entrypoint=""'
+                }
+            }
+            steps {
+				echo "🚀 Starting Selenium Grid for suite: '${env.SUITE_TO_RUN}'"
+                cleanWs()
+                checkout scm
+                printBuildMetadata(env.SUITE_TO_RUN)
+
+                // Retry starting the grid to handle any temporary network flakiness.
+                retry(2) {
+                    startDockerGrid('docker-compose-grid.yml', 20)
+                }
+            }
+        }
+
+        // This stage is only active for regression runs when the user explicitly toggles it on.
+        stage('Approval Gate (Regression Only)') {
+            when {
+                allOf {
+                    branch 'enhancements'
+                    expression { return env.SUITE_TO_RUN == 'regression' }
+                    expression { return params.MANUAL_APPROVAL == true }
+                }
+            }
+            agent any 
+            steps {
+                timeout(time: 30, unit: 'MINUTES') {
+                    input message: "🛑 Proceed with full regression for branch '${env.BRANCH_NAME}'?"
+                }
+            }
+        }
+
+        // This stage executes the tests in parallel across Chrome and Firefox.
+        stage('Build & Run Parallel Tests') {
+            when { branch 'enhancements' }
+            agent {
+                docker {
+                    image 'flight-booking-agent:latest'
+                    args '-u root -v /var/run/docker.sock:/var/run/docker.sock --entrypoint="" --network=selenium_grid_network'
+                }
+            }
+            steps {
+                echo "🧪 Running parallel tests for: ${env.SUITE_TO_RUN}"
+                timeout(time: 2, unit: 'HOURS') {
+                    script {
+                        def mvnBase = "mvn clean test -P ${env.SUITE_TO_RUN} -Denv=${params.TARGET_ENVIRONMENT} -Dtest.suite=${env.SUITE_TO_RUN} -Dbrowser.headless=true"
+                        parallel(
+                            Chrome: {
+                                sh "${mvnBase} -Dbrowser=CHROME -Dreport.dir=chrome -Dmaven.repo.local=.m2-chrome"
+                            },
+                            Firefox: {
+                                sh "${mvnBase} -Dbrowser=FIREFOX -Dreport.dir=firefox -Dmaven.repo.local=.m2-firefox"
+                            }
+                        )
+                    }
+                }
+            }
+        }
+    }
+
+    post {
+        // 'always' ensures these steps run regardless of the build's success or failure.
+        always {
+            script {
+				// Use the 'inside' step to run all cleanup, reporting, and notifications inside our container.
+				// This is needed because we're using 'agent none' at the top level.
+                docker.image('flight-booking-agent:latest').inside('-u root -v /var/run/docker.sock:/var/run/docker.sock --entrypoint=""') {
+
+                    if (env.BRANCH_NAME == 'enhancements') {
+                        echo '🧹 Shutting down Selenium Grid...'
+                        stopDockerGrid('docker-compose-grid.yml')
+                    }
+
+                    echo "📦 Generating dashboard for suite: ${env.SUITE_TO_RUN}"
+                    generateDashboard(env.SUITE_TO_RUN, "${env.BUILD_NUMBER}")
+                    archiveAndPublishReports()
+					
+					// ✅ This condition is now more flexible. As your project grows, you can add
+					 // other important branches like 'main' or 'release' to this list.
+
+                    if (env.BRANCH_NAME in ['enhancements', 'main']) {
+                        try {
+                            def qaseConfig = readJSON file: 'cicd/qase_config.json'
+                            def suiteSettings = qaseConfig[env.SUITE_TO_RUN]
+                            if (!suiteSettings) {
+                                error "❌ Qase config missing for suite: ${env.SUITE_TO_RUN}"
+                            }
+
+                            // Use parameter override if provided, otherwise use config file.
+                            def qaseIds = (params.QASE_TEST_CASE_IDS?.trim()) ? params.QASE_TEST_CASE_IDS : suiteSettings.testCaseIds
+
+                            updateQase(
+                                projectCode: 'FB',
+                                credentialsId: 'qase-api-token',
+                                testCaseIds: qaseIds
+                            )
+                            sendBuildSummaryEmail(
+                                suiteName: env.SUITE_TO_RUN,
+                                emailCredsId: 'recipient-email-list'
+                            )
+                        } catch (err) {
+                            echo "⚠️ Post-build notification failed: ${err.getMessage()}"
+                        }
+                    } else {
+                        echo "ℹ️ Skipping post-build notifications for branch: ${env.BRANCH_NAME}"
+                    }
+                }
+            }
+        }
+
+        // The 'failure' block provides an extra layer of cleanup specifically for failed builds.
+		failure {
+            script {
+                docker.image('flight-booking-agent:latest').inside('-u root -v /var/run/docker.sock:/var/run/docker.sock --entrypoint=""') {
+                    echo '⚠️ Build failed. Forcing Selenium Grid cleanup...'
+                    try {
+						// ✅ Detect leftover Selenium containers and stop them to prevent grid pollution
+                        def result = sh(script: 'docker ps -a --filter "name=selenium" --format "{{.Names}}"', returnStdout: true).trim()
+                        if (result) {
+                            echo "🛑 Stopping containers:\n${result}"
+                            stopDockerGrid('docker-compose-grid.yml')
+                        } else {
+                            echo "✅ No active Selenium containers found to stop."
+                        }
+                    } catch (e) {
+                        echo "⚠️ Docker cleanup error: ${e.getMessage()}"
+                    }
+                }
+            }
+        }
+    }
 }

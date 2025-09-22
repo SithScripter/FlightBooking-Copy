@@ -18,16 +18,18 @@ import com.demo.flightbooking.utils.JsonDataProvider;
 import com.demo.flightbooking.utils.WebDriverUtils;
 
 /**
- * Test class for booking flights, utilizing data providers for all test data.
- * Extends BaseTest for WebDriver and reporting setup/teardown.
+ * Contains the end-to-end test case for successfully booking a flight.
+ * This test class demonstrates the complete user flow from searching for a flight
+ * to receiving a booking confirmation.
  */
-public class BookingTest2 extends BaseTest {
+public class EndToEndBookingTest extends BaseTest {
 
     /**
-     * Test method to perform flight booking using passenger data from JSON.
-     * This test is part of the "regression" and "smoke" groups, covering the main E2E flow.
+     * Verifies the successful end-to-end booking of a flight using data from a JSON file.
+     * The test is data-driven, meaning it will run once for each passenger object
+     * provided by the JsonDataProvider.
      *
-     * @param passenger Passenger record containing personal, payment, and flight details from JSON.
+     * @param passenger A Passenger object containing all necessary data for one test run.
      */
     @Test(
             dataProvider = "passengerData", 
@@ -63,7 +65,7 @@ public class BookingTest2 extends BaseTest {
         Assert.assertTrue(urlContainsPurchase, "Did not navigate to purchase page!");
         
         // --- ADD THIS LINE TO FORCE A FAILURE ---
-//        Assert.assertTrue(false, "Intentionally failing test to check email notification.");
+//      Assert.assertTrue(false, "Intentionally failing test to check email notification.");
 
         PurchasePage purchasePage = new PurchasePage(driver);
         purchasePage.fillPurchaseForm(passenger);

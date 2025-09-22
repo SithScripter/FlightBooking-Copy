@@ -1,8 +1,10 @@
 package com.demo.flightbooking.model;
 
 /**
- * An immutable data carrier for a complete test case, including passenger and flight info.
- * Using a record significantly reduces boilerplate code.
+ * A data model representing a passenger and their booking details.
+ * This is a Java Record, which is a modern, concise way to create immutable
+ * data-carrier classes, reducing boilerplate code for constructors, getters,
+ * equals(), hashCode(), and toString().
  */
 public record Passenger(
     String origin,

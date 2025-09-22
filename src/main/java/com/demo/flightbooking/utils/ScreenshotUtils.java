@@ -10,10 +10,24 @@ import java.io.IOException;
 import java.text.SimpleDateFormat;
 import java.util.Date;
 
+/**
+ * A utility class for capturing screenshots of the browser.
+ * This is crucial for debugging test failures, as it provides a visual
+ * record of the application's state at the moment of failure.
+ */
 public class ScreenshotUtils {
 
     private static final String SCREENSHOT_DIR = "reports/screenshots/";
 
+    /**
+     * Captures a screenshot of the current browser window and saves it to a file.
+     * The screenshot is saved in the 'reports/screenshots' directory with a
+     * unique name based on the test name and a timestamp.
+     *
+     * @param driver   The WebDriver instance.
+     * @param testName The name of the test for which the screenshot is being taken.
+     * @return The absolute path to the saved screenshot file, or null if an error occurred.
+     */
     public static String captureScreenshot(WebDriver driver, String testName) {
         // Create folder if it doesn’t exist
         File dir = new File(SCREENSHOT_DIR);

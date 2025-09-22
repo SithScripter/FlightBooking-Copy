@@ -1,6 +1,7 @@
 package com.demo.flightbooking.utils;
 
 import com.demo.flightbooking.enums.BrowserType;
+
 import com.demo.flightbooking.factory.BrowserOptionsFactory;
 import java.net.MalformedURLException;
 import java.net.URI;
@@ -19,9 +20,18 @@ import org.openqa.selenium.firefox.FirefoxDriver;
 import org.openqa.selenium.firefox.FirefoxOptions;
 import org.openqa.selenium.remote.RemoteWebDriver;
 
+/**
+ * Manages the WebDriver instance in a thread-safe manner for parallel test execution.
+ * This class ensures that each test thread gets its own separate WebDriver instance,
+ * preventing conflicts and instability during parallel runs.
+ */
 public class DriverManager {
 
     private static final Logger logger = LogManager.getLogger(DriverManager.class);
+    /**
+     * A ThreadLocal variable to store the WebDriver instance.
+     * This is the key to achieving thread safety in parallel execution.
+     */
     private static final ThreadLocal<WebDriver> driver = new ThreadLocal<>();
     private static final ThreadLocal<String> browserName = new ThreadLocal<>();
 
@@ -33,7 +43,14 @@ public class DriverManager {
     public static String getBrowser() {
         return browserName.get();
     }
-
+    
+    /**
+     * Retrieves the WebDriver instance for the current thread.
+     * If an instance does not exist, it creates a new one based on the
+     * configuration in config.properties (e.g., browser type, grid enabled, headless mode).
+     *
+     * @return The WebDriver instance for the current thread.
+     */
     public static WebDriver getDriver() {
         if (driver.get() == null) {
             String browser = browserName.get() != null
@@ -103,6 +120,10 @@ public class DriverManager {
         return driver.get();
     }
 
+    /**
+     * Quits the WebDriver instance for the current thread and removes it from the ThreadLocal variable.
+     * This is crucial for cleaning up resources and preventing memory leaks after a test is complete.
+     */
     public static void quitDriver() {
         if (driver.get() != null) {
             logger.info("Quitting driver for thread: {}", Thread.currentThread().threadId());

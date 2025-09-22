@@ -9,9 +9,9 @@ import com.demo.flightbooking.utils.ConfigReader;
 import com.demo.flightbooking.utils.WebDriverUtils;
 
 /**
- * Page Object for the Flight Selection Page (reserve.php).
- * This class contains elements and actions related to selecting a flight.
- * It now includes a Stream-based method to process flight data.
+ * Represents the Flight Selection Page of the BlazeDemo application.
+ * This page appears after a user has searched for flights, and it lists
+ * the available options.
  */
 public class FlightSelectionPage extends BasePage {
 
@@ -25,7 +25,10 @@ public class FlightSelectionPage extends BasePage {
     // WebDriverUtils instance for robust interactions
     private final WebDriverUtils webDriverUtils;
 
-    // Constructor
+    /**
+     * Constructor for the FlightSelectionPage.
+     * @param driver The WebDriver instance.
+     */
     public FlightSelectionPage(WebDriver driver) {
         super(driver); // Call BasePage constructor
         this.webDriverUtils = new WebDriverUtils(driver, ConfigReader.getPropertyAsInt("test.timeout"));
@@ -34,7 +37,9 @@ public class FlightSelectionPage extends BasePage {
 
     // --- Action Methods ---
 
-    // Method to click the first "Choose Flight" button on the page
+    /**
+     * Clicks the "Choose This Flight" button to select the first available flight.
+     */
     public void clickChooseFlightButton() {
         logger.info("Clicking Choose This Flight button.");
         webDriverUtils.click(chooseFlightButton);

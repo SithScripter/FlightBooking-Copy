@@ -13,7 +13,10 @@ import com.aventstack.extentreports.Status;
 import com.demo.flightbooking.utils.ExtentManager;
 
 /**
- * A comprehensive TestNG listener that handles applying the RetryAnalyzer.
+ * A TestNG listener class that implements ITestListener.
+ * Listeners allow you to execute custom code in response to TestNG events,
+ * such as when a test starts, passes, or fails. This is useful for custom
+ * logging, reporting, or integrating with other tools.
  */
 public class TestListener implements ITestListener, IAnnotationTransformer {
 

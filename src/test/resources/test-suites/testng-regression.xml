@@ -8,17 +8,17 @@
         <listener class-name="com.demo.flightbooking.listeners.TestListener" />
     </listeners>
  
-    <test name="BookingTest-Chrome">
+    <test name="ChromeTests">
         <parameter name="browser" value="chrome"/>
         <classes>
-            <class name="com.demo.flightbooking.tests.booking.BookingTest"/>
-        </classes>
-    </test>
-    <test name="BookingTest-Firefox">
-        <parameter name="browser" value="firefox"/>
-        <classes>
-            <class name="com.demo.flightbooking.tests.booking.BookingTest2"/>
+            <class name="com.demo.flightbooking.tests.booking.EndToEndBookingTest"/>
         </classes>
     </test>
 
+    <test name="FirefoxTests">
+        <parameter name="browser" value="firefox"/>
+        <classes>
+            <class name="com.demo.flightbooking.tests.booking.EndToEndBookingTest"/>
+        </classes>
+    </test>
 </suite>

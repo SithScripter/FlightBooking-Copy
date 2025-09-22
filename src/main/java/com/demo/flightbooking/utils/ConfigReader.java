@@ -7,13 +7,21 @@ import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import com.demo.flightbooking.enums.EnvironmentType;
 
-
+/**
+ * A utility class to read configuration settings from the config.properties file.
+ * It uses a static block to load the properties once, making it efficient.
+ * This class centralizes all configuration management.
+ */
 public class ConfigReader {
 
     private static final Logger logger = LogManager.getLogger(ConfigReader.class);
     private static final Properties properties = new Properties();
     private static final String CONFIG_FILE = System.getProperty("configFile", "config/config.properties");
-
+    
+    /**
+     * Static block to load the properties file when the class is initialized.
+     * This ensures the properties are loaded only once during the test execution.
+     */
     static {
         try (InputStream stream = ConfigReader.class.getClassLoader().getResourceAsStream(CONFIG_FILE)) {
             if (stream == null) {
@@ -28,6 +36,12 @@ public class ConfigReader {
         }
     }
 
+    /**
+     * Retrieves a property value by its key.
+     *
+     * @param key The key of the property to retrieve.
+     * @return The property value as a String.
+     */
     public static String getProperty(String key) {
         String value = properties.getProperty(key);
         if (value == null) {
@@ -35,7 +49,13 @@ public class ConfigReader {
         }
         return value;
     }
-
+    
+    /**
+     * Retrieves a property value and converts it to an integer.
+     *
+     * @param key The key of the property to retrieve.
+     * @return The property value as an int.
+     */
     public static int getPropertyAsInt(String key) {
         String value = getProperty(key);
         if (value != null) {

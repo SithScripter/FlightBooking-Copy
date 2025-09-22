@@ -11,7 +11,10 @@ import java.time.Duration;
 import java.util.List;
 
 /**
- * Utility class for common WebDriver interactions, providing robust, waited, and logged actions.
+ * A utility class providing robust explicit wait methods for Selenium.
+ * Using explicit waits is a best practice that makes tests more stable and reliable
+ * by waiting for specific conditions to be met before proceeding, rather than
+ * using fixed (and often brittle) sleeps.
  */
 public class WebDriverUtils {
 
@@ -21,9 +24,9 @@ public class WebDriverUtils {
 
     /**
      * Constructor for WebDriverUtils.
+     * Initializes the WebDriverWait with a timeout defined in the config file.
      *
      * @param driver The WebDriver instance.
-     * @param timeoutSeconds The default timeout for explicit waits in seconds.
      */
     public WebDriverUtils(WebDriver driver, int timeoutSeconds) {
         this.driver = driver;

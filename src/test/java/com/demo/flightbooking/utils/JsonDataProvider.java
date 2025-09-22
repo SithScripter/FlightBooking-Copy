@@ -10,12 +10,22 @@ import com.demo.flightbooking.model.Passenger;
 import com.google.gson.Gson;
 import com.google.gson.reflect.TypeToken;
 
-
+/**
+ * Provides test data to TestNG tests by reading from a JSON file.
+ * This class uses the Gson library to parse the JSON into a list of Java objects.
+ */
 public class JsonDataProvider {
 
     // Correct the path to reflect the 'testdata' folder within resources (NO HYPHEN)
-    private static final String JSON_FILE = "testdata/passengers.json"; // <--- Corrected path
+//    private static final String JSON_FILE = "testdata/passengers.json"; // <--- Corrected path
+	private static final String JSON_FILE = ConfigReader.getProperty("data.file.passengers.json");
 
+    /**
+     * TestNG DataProvider method that reads passenger data from a JSON file.
+     * It uses Gson to deserialize the JSON array into a list of Passenger objects.
+     *
+     * @return A 2D Object array where each inner array contains a single Passenger object.
+     */
     @DataProvider(name = "passengerData")
     public static Object[][] getPassengerData() throws Exception {
         Gson gson = new Gson();

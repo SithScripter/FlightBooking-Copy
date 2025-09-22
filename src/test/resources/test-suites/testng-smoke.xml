@@ -15,7 +15,7 @@
 			</run>
 		</groups>
 		<classes>
-			<class name="com.demo.flightbooking.tests.booking.BookingTest" />
+			<class name="com.demo.flightbooking.tests.booking.EndToEndBookingTest" />
 		</classes>
 	</test>
 	<test name="SmokeTest-Firefox">
@@ -26,7 +26,7 @@
 			</run>
 		</groups>
 		<classes>
-			<class name="com.demo.flightbooking.tests.booking.BookingTest2" />
+			<class name="com.demo.flightbooking.tests.booking.EndToEndBookingTest" />
 		</classes>
 	</test>
 

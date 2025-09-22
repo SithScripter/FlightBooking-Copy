@@ -12,8 +12,8 @@ import java.util.List;
 import java.util.stream.Collectors;
 
 /**
- * Page Object for the Home Page (blazedemo.com).
- * This class contains elements and actions related to the flight search form.
+ * Represents the Home Page of the BlazeDemo application.
+ * This class contains WebElements and methods to interact with the flight search functionality.
  */
 public class HomePage extends BasePage { // Extend BasePage
 
@@ -28,6 +28,10 @@ public class HomePage extends BasePage { // Extend BasePage
     // WebDriverUtils instance for robust interactions
     private WebDriverUtils webDriverUtils; // Declare WebDriverUtils
 
+    /**
+     * Constructor for the HomePage.
+     * @param driver The WebDriver instance.
+     */
     // Constructor to initialize the WebDriver, WebDriverWait (via BasePage), and WebDriverUtils
     public HomePage(WebDriver driver) {
         super(driver); // Call BasePage constructor
@@ -96,10 +100,11 @@ public class HomePage extends BasePage { // Extend BasePage
     }
 
     /**
-     * Performs the full flight search operation from the home page.
+     * Selects the departure and destination cities from the dropdowns and
+     * submits the form to find available flights.
      *
-     * @param departCity The city to depart from.
-     * @param arriveCity The city to arrive at.
+     * @param origin      The city of departure (e.g., "Boston").
+     * @param destination The city of arrival (e.g., "London").
      */
     public void findFlights(String departCity, String arriveCity) {
         logger.info("Performing flight search from {} to {}.", departCity, arriveCity);

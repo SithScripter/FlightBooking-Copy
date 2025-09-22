@@ -4,20 +4,59 @@ C:.
 ¦   .classpath
 ¦   .gitignore
 ¦   .project
+¦   docker-compose.yml
+¦   Jenkinsfile-dynamic
 ¦   pom.xml
-¦   project_structure.txt
+¦   README.md
+¦   tree_structure.txt
 ¦   
 +---.settings
+¦       org.eclipse.core.resources.prefs
 ¦       org.eclipse.jdt.core.prefs
+¦       org.eclipse.jdt.groovy.core.prefs
 ¦       org.eclipse.m2e.core.prefs
+¦       
++---cicd
+¦       .dockerignore
+¦       Dockerfile
+¦       qase_config.json
 ¦       
 +---logs
 ¦       automation.log
 ¦       
 +---reports
-¦   ¦   extent-report.html
-¦   ¦   
-¦   +---screenshots
+¦   +---chrome
+¦   ¦   ¦   default-chrome-report.html
+¦   ¦   ¦   
+¦   ¦   +---spark
+¦   ¦           font-awesome.min.css
+¦   ¦           fontawesome-webfont.eot
+¦   ¦           fontawesome-webfont.svg
+¦   ¦           fontawesome-webfont.ttf
+¦   ¦           fontawesome-webfont.woff
+¦   ¦           fontawesome-webfont.woff2
+¦   ¦           FontAwesome.otf
+¦   ¦           jsontree.js
+¦   ¦           logo.png
+¦   ¦           spark-script.js
+¦   ¦           spark-style.css
+¦   ¦           
+¦   +---firefox
+¦       ¦   default-firefox-report.html
+¦       ¦   
+¦       +---spark
+¦               font-awesome.min.css
+¦               fontawesome-webfont.eot
+¦               fontawesome-webfont.svg
+¦               fontawesome-webfont.ttf
+¦               fontawesome-webfont.woff
+¦               fontawesome-webfont.woff2
+¦               FontAwesome.otf
+¦               jsontree.js
+¦               logo.png
+¦               spark-script.js
+¦               spark-style.css
+¦               
 +---screenshots
 +---src
 ¦   +---main
@@ -28,6 +67,9 @@ C:.
 ¦   ¦   ¦               +---enums
 ¦   ¦   ¦               ¦       BrowserType.java
 ¦   ¦   ¦               ¦       EnvironmentType.java
+¦   ¦   ¦               ¦       
+¦   ¦   ¦               +---factory
+¦   ¦   ¦               ¦       BrowserOptionsFactory.java
 ¦   ¦   ¦               ¦       
 ¦   ¦   ¦               +---model
 ¦   ¦   ¦               ¦       Passenger.java
@@ -60,7 +102,7 @@ C:.
 ¦       ¦               ¦   ¦       BaseTest.java
 ¦       ¦               ¦   ¦       
 ¦       ¦               ¦   +---booking
-¦       ¦               ¦           BookingTest.java
+¦       ¦               ¦           EndToEndBookingTest.java
 ¦       ¦               ¦           
 ¦       ¦               +---utils
 ¦       ¦                       CsvDataProvider.java
@@ -84,37 +126,75 @@ C:.
 +---target
 ¦   +---classes
 ¦   ¦   +---com
-¦   ¦   ¦   +---demo
-¦   ¦   ¦       +---flightbooking
-¦   ¦   ¦           +---enums
-¦   ¦   ¦           ¦       BrowserType.class
-¦   ¦   ¦           ¦       EnvironmentType.class
-¦   ¦   ¦           ¦       
-¦   ¦   ¦           +---model
-¦   ¦   ¦           ¦       Passenger.class
-¦   ¦   ¦           ¦       
-¦   ¦   ¦           +---pages
-¦   ¦   ¦           ¦       BasePage.class
-¦   ¦   ¦           ¦       FlightSelectionPage.class
-¦   ¦   ¦           ¦       HomePage.class
-¦   ¦   ¦           ¦       PurchasePage.class
-¦   ¦   ¦           ¦       
-¦   ¦   ¦           +---utils
-¦   ¦   ¦                   ConfigReader.class
-¦   ¦   ¦                   DriverManager.class
-¦   ¦   ¦                   ExtentManager.class
-¦   ¦   ¦                   ScreenshotUtils.class
-¦   ¦   ¦                   WebDriverUtils.class
-¦   ¦   ¦                   
-¦   ¦   +---META-INF
-¦   ¦       ¦   MANIFEST.MF
-¦   ¦       ¦   
-¦   ¦       +---maven
-¦   ¦           +---com.demo
-¦   ¦               +---flightbooking
-¦   ¦                       pom.properties
-¦   ¦                       pom.xml
+¦   ¦       +---demo
+¦   ¦           +---flightbooking
+¦   ¦               +---enums
+¦   ¦               ¦       BrowserType.class
+¦   ¦               ¦       EnvironmentType.class
+¦   ¦               ¦       
+¦   ¦               +---factory
+¦   ¦               ¦       BrowserOptionsFactory.class
+¦   ¦               ¦       
+¦   ¦               +---model
+¦   ¦               ¦       Passenger.class
+¦   ¦               ¦       
+¦   ¦               +---pages
+¦   ¦               ¦       BasePage.class
+¦   ¦               ¦       FlightSelectionPage.class
+¦   ¦               ¦       HomePage.class
+¦   ¦               ¦       PurchasePage.class
+¦   ¦               ¦       
+¦   ¦               +---utils
+¦   ¦                       ConfigReader.class
+¦   ¦                       DriverManager.class
+¦   ¦                       ExtentManager.class
+¦   ¦                       ScreenshotUtils.class
+¦   ¦                       WebDriverUtils.class
 ¦   ¦                       
+¦   +---generated-sources
+¦   ¦   +---annotations
+¦   +---generated-test-sources
+¦   ¦   +---test-annotations
+¦   +---maven-status
+¦   ¦   +---maven-compiler-plugin
+¦   ¦       +---compile
+¦   ¦       ¦   +---default-compile
+¦   ¦       ¦           createdFiles.lst
+¦   ¦       ¦           inputFiles.lst
+¦   ¦       ¦           
+¦   ¦       +---testCompile
+¦   ¦           +---default-testCompile
+¦   ¦                   createdFiles.lst
+¦   ¦                   inputFiles.lst
+¦   ¦                   
+¦   +---surefire-reports
+¦   ¦   ¦   bullet_point.png
+¦   ¦   ¦   collapseall.gif
+¦   ¦   ¦   emailable-report.html
+¦   ¦   ¦   failed.png
+¦   ¦   ¦   index.html
+¦   ¦   ¦   jquery-3.6.0.min.js
+¦   ¦   ¦   navigator-bullet.png
+¦   ¦   ¦   passed.png
+¦   ¦   ¦   skipped.png
+¦   ¦   ¦   TEST-TestSuite.xml
+¦   ¦   ¦   testng-reports.css
+¦   ¦   ¦   testng-reports.js
+¦   ¦   ¦   testng-reports1.css
+¦   ¦   ¦   testng-reports2.js
+¦   ¦   ¦   testng-results.xml
+¦   ¦   ¦   TestSuite.txt
+¦   ¦   ¦   
+¦   ¦   +---junitreports
+¦   ¦   ¦       TEST-com.demo.flightbooking.tests.booking.BookingTest.xml
+¦   ¦   ¦       TEST-com.demo.flightbooking.tests.booking.BookingTest2.xml
+¦   ¦   ¦       
+¦   ¦   +---Smoke Suite
+¦   ¦           SmokeTest-Chrome.html
+¦   ¦           SmokeTest-Chrome.xml
+¦   ¦           SmokeTest-Firefox.html
+¦   ¦           SmokeTest-Firefox.xml
+¦   ¦           
 ¦   +---test-classes
 ¦       ¦   log4j2.xml
 ¦       ¦   
@@ -130,7 +210,7 @@ C:.
 ¦       ¦           ¦   ¦       BaseTest.class
 ¦       ¦           ¦   ¦       
 ¦       ¦           ¦   +---booking
-¦       ¦           ¦           BookingTest.class
+¦       ¦           ¦           EndToEndBookingTest.class
 ¦       ¦           ¦           
 ¦       ¦           +---utils
 ¦       ¦                   CsvDataProvider.class
@@ -177,8 +257,15 @@ C:.
     ¦       
     +---junitreports
     ¦       TEST-com.demo.flightbooking.tests.booking.BookingTest.xml
+    ¦       TEST-com.demo.flightbooking.tests.booking.BookingTest2.xml
     ¦       
     +---Regression Suite
+    ¦       BookingTest-Chrome.html
+    ¦       BookingTest-Chrome.xml
+    ¦       BookingTest-Firefox.html
+    ¦       BookingTest-Firefox.xml
+    ¦       BookingTest2-Firefox.html
+    ¦       BookingTest2-Firefox.xml
     ¦       Flight Booking Regression Test.html
     ¦       Flight Booking Regression Test.xml
     ¦       testng-failed.xml

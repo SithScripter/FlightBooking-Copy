@@ -6,8 +6,9 @@ import org.openqa.selenium.WebDriver;
 import org.openqa.selenium.support.ui.Select;
 
 /**
- * Page Object for the flight purchase page (purchase.php).
- * Encapsulates all elements and actions available on this page.
+ * Represents the Purchase Page of the BlazeDemo application.
+ * This is the final step where the user enters their personal and payment
+ * information to complete the booking.Encapsulates all elements and actions available on this page.
  */
 public class PurchasePage extends BasePage {
 
@@ -25,6 +26,10 @@ public class PurchasePage extends BasePage {
     private final By rememberMeCheckbox = By.id("rememberMe");
     private final By purchaseFlightButton = By.xpath("//input[@value='Purchase Flight']");
 
+    /**
+     * Constructor for the PurchasePage.
+     * @param driver The WebDriver instance.
+     */
     public PurchasePage(WebDriver driver) {
         super(driver);
     }
@@ -104,6 +109,9 @@ public class PurchasePage extends BasePage {
         driver.findElement(rememberMeCheckbox).click();
     }
 
+    /**
+     * Clicks the "Purchase Flight" button to submit the form and complete the booking.
+     */
     public void clickPurchaseFlightButton() {
         logger.info("Clicking on 'Purchase Flight' button");
         driver.findElement(purchaseFlightButton).click();

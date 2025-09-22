@@ -3,163 +3,56 @@
 This is a hybrid Selenium + TestNG automation framework for the BlazeDemo website, designed with best practices for CI/CD, reporting, and parallel execution.
 
 ---
+This is a robust Selenium test automation framework designed to perform end-to-end tests for the BlazeDemo flight booking application. It is built with industry-best practices to be scalable, maintainable, and easy for any team member to use.
 
-## ✅ CURRENT STAGE (FROZEN)
+## ✨ Features
 
-🔒 This version is **frozen and tagged as `jenkins-ci-v1`**. It includes:
-
-- ✅ Jenkins CI jobs for:
-  - Smoke Tests (on every Git push)
-  - Regression Suite (nightly trigger)
-- ✅ Dockerized Selenium Grid (hub + Chrome + Firefox)
-- ✅ Parallel execution with TestNG (multi-browser)
-- ✅ Dynamic Extent Reports
-- ✅ Failure summaries (for Jenkins email reports)
-- ✅ Qase.io test result uploads
-- ✅ Email Notifications (via `emailext` plugin)
+* **Page Object Model (POM)**: Clean separation of UI elements from test logic for easy maintenance.
+* **Data-Driven Testing**: Test data is managed externally in CSV and JSON files, no hard-coded data in tests.
+* **Cross-Browser Execution**: Supports Chrome, Firefox, and Edge, configurable from a single file.
+* **Parallel Test Execution**: Configured with TestNG to run tests in parallel, significantly reducing execution time.
+* **Docker Integration**: Comes with a pre-configured Selenium Grid, allowing for consistent test runs in a containerized environment with a single command.
+* **CI/CD Ready**: Includes a `Jenkinsfile` for easy integration into a CI/CD pipeline.
+* **Rich Reporting**: Generates detailed HTML reports using ExtentReports, including screenshots for failed tests.
 
 ---
 
-## 🧪 Test Suites Overview
+## 🚀 Getting Started
 
-| Suite       | Trigger         | Runs In      | TestNG XML                          | Profile ID |
-|-------------|------------------|--------------|-------------------------------------|------------|
-| Smoke       | GitHub push      | Jenkins CI   | `testng-smoke.xml`                  | `smoke`    |
-| Regression  | Nightly (2 AM)  | Jenkins CI   | `testng-regression.xml`             | `regression` |
+### Prerequisites
 
-> All test classes extend `BaseTest.java` and support parallel browser execution.
+* Java 21+
+* Apache Maven
+* Docker Desktop
 
----
+### How to Run Tests
 
-## 🧩 Technology Stack
+There are two ways to run the tests:
 
-- Java 21
-- Selenium 4.26
-- TestNG 7.10.2
-- Maven 3.9.9
-- Docker + Docker Compose
-- Jenkins Declarative Pipelines
-- Qase.io (test case management)
-- ExtentReports 5.1.2
-- Email Notifications (HTML + attachments)
+**1. Run Locally**
 
----
-
-## 🧪 Run Tests Locally (No CI)
-
-Start Selenium Grid locally:
+This command runs the full regression suite on your local Chrome browser.
 
 ```bash
-docker-compose -f docker-compose-grid.yml up -d
+# Set selenium.grid.enabled=false in src/test/resources/config/config.properties
+mvn clean test -Dsuite.xml.file=testng-regression.xml
 
+**2. Run on Dockerized Selenium Grid**
 
-Run smoke tests:
+# 1. Start the Selenium Grid
+docker-compose up -d
 
-bash
-Copy
-Edit
-mvn clean test -P smoke -Denv=QA -Dtest.suite=smoke
-Run regression suite:
+# 2. Run the tests
+# Set selenium.grid.enabled=true in src/test/resources/config/config.properties
+mvn clean test -Dsuite.xml.file=testng-regression.xml
 
-bash
-Copy
-Edit
-mvn clean test -P regression -Denv=QA -Dtest.suite=regression
-Stop Selenium Grid after tests:
+# 3. Shut down the Grid when finished
+docker-compose down
 
-bash
-Copy
-Edit
-docker-compose -f docker-compose-grid.yml down
-🚀 Jenkins Job Details
-1. CI Smoke Tests (Git-triggered)
-Location: Jenkins > Job: CI-Smoke-Tests
+📊 Reporting
+After a test run, the detailed HTML report can be found at:
+reports/chrome/regression-chrome-report.html
 
-Triggers on GitHub push
-
-Uses testng-smoke.xml
-
-Executes in parallel across Chrome + Firefox
-
-Grid is spun up using Docker Compose
-
-Test reports and summaries published post build
-
-2. Nightly Regression Suite
-Location: Jenkins > Job: Nightly-Regression-Suite
-
-Triggered nightly at a scheduled time
-
-Uses testng-regression.xml
-
-Grid started + stopped automatically
-
-ExtentReports and failure summaries archived
-
-Qase.io integration and email notifications
-
-📂 Reports and Logs
-After every Jenkins build:
-
-File	Description
-reports/index.html	Full Extent HTML Report
-reports/smoke-report.html	Smoke suite report
-reports/regression-report.html	Regression suite report
-reports/smoke-failure-summary.txt	Only failed tests summary (for email)
-reports/regression-failure-summary.txt	Failed regression tests
-screenshots/	Screenshots on test failures
-logs/	Log4j logs per run
-
-🔌 Docker Grid Info
-File: docker-compose-grid.yml
-
-yaml
-Copy
-Edit
-services:
-  selenium-hub:
-    image: selenium/hub:4.27
-    ports:
-      - "4444:4444"
-    environment:
-      - GRID_TIMEOUT=60
-      - GRID_CLEAN_UP_CYCLE=60
-
-  chrome:
-    image: selenium/node-chromium:4.27
-    shm_size: "2g"
-    depends_on:
-      - selenium-hub
-    environment:
-      - SE_EVENT_BUS_HOST=selenium-hub
-      - SE_NODE_MAX_SESSIONS=2
-
-  firefox:
-    image: selenium/node-firefox:4.27
-    shm_size: "2g"
-    depends_on:
-      - selenium-hub
-    environment:
-      - SE_EVENT_BUS_HOST=selenium-hub
-      - SE_NODE_MAX_SESSIONS=2
-Both nodes support up to 2 sessions each (for parallelism).
-
-
-☁️ To Do Later (Optional Enhancements)
-Feature	Purpose
-GitHub Actions CI/CD	Migrate CI to GitHub-hosted runners
-AWS EC2 Integration	Run tests in cloud-managed infra
-Kubernetes (K8s)	Scale browser nodes dynamically
-Allure Reporting	Alternative report integration
-Sauce Labs / BrowserStack	Cloud cross-browser testing
-
-👤 Author
-Tester: Sithscripter (GitHub)
-
-Framework: Java + Selenium + Jenkins + Docker
-
-Contact: [Your email / LinkedIn]
-
-🏁 You are currently on a stable CI checkpoint. Tag: jenkins-ci-v1
+This is the recommended way to run tests for consistency.
 
 Happy Testing! 🧪🐞🚀

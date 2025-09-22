@@ -12,15 +12,24 @@ import org.openqa.selenium.edge.EdgeOptions;
 import org.openqa.selenium.firefox.FirefoxOptions;
 
 /**
- * Returns browser-specific options after setting up WebDriverManager.
- *
- * @param browserType Enum for supported browsers.
- * @return MutableCapabilities instance with browser-specific options.
+ * A factory class for creating browser-specific configurations (Options).
+ * It centralizes the logic for setting up browser capabilities, such as headless mode,
+ * and uses WebDriverManager to automatically handle browser driver executables.
  */
 
 public class BrowserOptionsFactory {
 
     private static final Logger logger = LogManager.getLogger(BrowserOptionsFactory.class);
+    
+    /**
+     * Gets the browser-specific capabilities.
+     * It sets up the appropriate driver using WebDriverManager and configures
+     * options like headless mode.
+     *
+     * @param browserType The type of browser (e.g., CHROME, FIREFOX).
+     * @param isHeadless  A boolean flag to indicate if the browser should run in headless mode.
+     * @return A MutableCapabilities object with the browser-specific settings.
+     */
 
     public static MutableCapabilities getOptions(BrowserType browserType, boolean isHeadless) {
         logger.info("Creating options for browser: {}", browserType);

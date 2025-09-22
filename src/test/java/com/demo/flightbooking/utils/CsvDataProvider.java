@@ -10,13 +10,20 @@ import java.util.ArrayList;
 import java.util.List;
 
 /**
- * Data provider that reads passenger test data from a CSV file.
- * This version uses Java Streams for final data transformation.
+ * Provides test data to TestNG tests by reading from a CSV file.
+ * This class demonstrates a data-driven approach using CSV as the data source.
  */
 public class CsvDataProvider {
 
-    private static final String CSV_FILE = "testdata/passenger-data.csv";
+//    private static final String CSV_FILE = "testdata/passenger-data.csv";
+	private static final String CSV_FILE = ConfigReader.getProperty("data.file.passengers.csv");
 
+    /**
+     * TestNG DataProvider method that reads passenger data from a CSV file.
+     * It skips the header row and converts each subsequent row into a Passenger object.
+     *
+     * @return A 2D Object array where each inner array contains a single Passenger object.
+     */
     @DataProvider(name = "passengerCsvData")
     public Object[][] provideCsvData() throws Exception {
         List<Passenger> passengerList = new ArrayList<>();

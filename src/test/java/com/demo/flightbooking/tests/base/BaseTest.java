@@ -28,6 +28,11 @@ import com.demo.flightbooking.utils.DriverManager;
 import com.demo.flightbooking.utils.ExtentManager;
 import com.demo.flightbooking.utils.ScreenshotUtils;
 
+/**
+ * The base class for all test classes in the framework.
+ * It handles the setup and teardown of essential components like WebDriver,
+ * ExtentReports, and logging, ensuring a consistent test execution lifecycle.
+ */
 public class BaseTest {
 
     protected static final Logger logger = LogManager.getLogger(BaseTest.class);
@@ -40,8 +45,8 @@ public class BaseTest {
             Collections.synchronizedList(new ArrayList<>());
 
     /**
-     * ✅ Runs once before the entire suite (for all tests).
-     * Used to setup logging folder and common info.
+     * This method runs once before the entire test suite.
+     * It sets up the ExtentReports instance and configures the report's appearance.
      */
     @BeforeSuite(alwaysRun = true)
     public void setUpSuite() {
@@ -100,8 +105,11 @@ public class BaseTest {
     }
 
     /**
-     * ✅ Runs before each test method.
-     * Initializes WebDriver and the ExtentTest for logging.
+     * This method runs before each test method.
+     * It initializes the WebDriver instance for the current thread and creates a new
+     * test entry in the ExtentReport.
+     *
+     * @param method The test method that is about to be run.
      */
     @Parameters("browser")
     @BeforeMethod(alwaysRun = true)
@@ -119,8 +127,11 @@ public class BaseTest {
     }
 
     /**
-     * ✅ Runs after each test method.
-     * Takes screenshot on failure and logs result to report.
+     * This method runs after each test method.
+     * It checks the test result, takes a screenshot on failure, logs the status
+     * in the report, and then quits the WebDriver instance for the current thread.
+     *
+     * @param result The result of the test method that has just run.
      */
     @AfterMethod(alwaysRun = true)
     public void tearDown(ITestResult result) {

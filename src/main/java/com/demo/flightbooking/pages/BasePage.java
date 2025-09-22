@@ -10,9 +10,9 @@ import org.openqa.selenium.support.ui.WebDriverWait;
 import com.demo.flightbooking.utils.ConfigReader;
 
 /**
- * Base class for all Page Objects.
- * Centralizes WebDriver and WebDriverWait initialization, and provides common utilities
- * for all page classes.
+ * Represents the base class for all Page Objects in the framework.
+ * It initializes the WebDriver, WebDriverWait, and logger, and provides common
+ * page functionalities that can be inherited by all specific page classes.
  */
 public abstract class BasePage {
 
@@ -21,6 +21,14 @@ public abstract class BasePage {
     protected final Logger logger; // Logger for each page object
 
     private static final int DEFAULT_TIMEOUT = 10; // Default timeout if not specified in config
+    
+    /**
+     * Constructor for the BasePage.
+     * It initializes the WebDriver and WebDriverWait for the page, and it also
+     * initializes all WebElements annotated with @FindBy using the PageFactory.
+     *
+     * @param driver The WebDriver instance to be used by the page.
+     */
 
     public BasePage(WebDriver driver) {
         this.driver = driver;
@@ -40,8 +48,9 @@ public abstract class BasePage {
     }
 
     /**
-     * Get the title of the current page.
-     * @return The page title.
+     * Gets the title of the current page.
+     *
+     * @return A string representing the page title.
      */
     public String getPageTitle() {
         return driver.getTitle();

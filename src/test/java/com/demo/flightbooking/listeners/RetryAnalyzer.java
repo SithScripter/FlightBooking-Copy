@@ -7,8 +7,10 @@ import org.testng.ITestResult;
 import com.demo.flightbooking.utils.ConfigReader;
 
 /**
- * A TestNG retry analyzer that retries a failed test a configurable number of times.
- * This class resides in the 'listeners' package.
+ * An implementation of TestNG's IRetryAnalyzer interface.
+ * This class is used to automatically re-run a failed test a certain number of times.
+ * This can be useful for handling flaky tests that might fail due to intermittent
+ * environmental or network issues.
  */
 public class RetryAnalyzer implements IRetryAnalyzer {
 
@@ -17,6 +19,13 @@ public class RetryAnalyzer implements IRetryAnalyzer {
     // Read the max retry count from the config file.
     private static final int maxRetryCount = ConfigReader.getPropertyAsInt("test.retry.maxcount");
 
+    /**
+     * This method is called by TestNG when a test fails.
+     * It decides whether the test should be retried.
+     *
+     * @param result The result of the test that has just failed.
+     * @return True if the test should be retried, false otherwise.
+     */
     @Override
     public boolean retry(ITestResult result) {
         if (retryCount < maxRetryCount) {
