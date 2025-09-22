@@ -38,11 +38,20 @@ public class BrowserOptionsFactory {
 //        isHeadless = Boolean.parseBoolean(ConfigReader.getProperty("browser.headless"));
         logger.info("Headless mode for {}: {}", browserType, isHeadless);
         
+        // ✅ Read the grid configuration setting
+        boolean useGrid = Boolean.parseBoolean(ConfigReader.getProperty("selenium.grid.enabled"));
+        
         switch (browserType) {
             case CHROME:
                 // --- THIS IS THE CHANGE ---
                 // WebDriverManager setup is now handled here.
-                WebDriverManager.chromedriver().setup();	
+            	
+                // ✅ Only run WebDriverManager setup if not using the Grid
+                if (!useGrid) {
+                    WebDriverManager.chromedriver().setup();
+                }
+            	
+//                WebDriverManager.chromedriver().setup();	
                 ChromeOptions chromeOptions = new ChromeOptions();
                 chromeOptions.addArguments("--start-maximized");
                 chromeOptions.addArguments("--disable-gpu");
@@ -59,7 +68,13 @@ public class BrowserOptionsFactory {
 
             case FIREFOX:
                 // --- THIS IS THE CHANGE ---
-                WebDriverManager.firefoxdriver().setup();
+            	
+                // ✅ Only run WebDriverManager setup if not using the Grid
+                if (!useGrid) {
+                    WebDriverManager.firefoxdriver().setup();
+                }
+            	
+//                WebDriverManager.firefoxdriver().setup();
                 FirefoxOptions firefoxOptions = new FirefoxOptions();
                 
                 // ✅ Add headless for Firefox
@@ -73,7 +88,12 @@ public class BrowserOptionsFactory {
 
             case EDGE:
                 // --- THIS IS THE CHANGE ---
-                WebDriverManager.edgedriver().setup();
+                // ✅ Only run WebDriverManager setup if not using the Grid
+                if (!useGrid) {
+                    WebDriverManager.edgedriver().setup();
+                }
+            	
+//                WebDriverManager.edgedriver().setup();
                 EdgeOptions edgeOptions = new EdgeOptions();
                 edgeOptions.addArguments("--start-maximized");
                 edgeOptions.addArguments("--inprivate");
