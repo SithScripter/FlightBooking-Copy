@@ -64,6 +64,7 @@ pipeline {
 					def isManualTrigger = causes.any { it instanceof hudson.model.Cause$UserIdCause }
 					def isTimerTrigger = causes.any { it instanceof hudson.triggers.TimerTrigger$TimerTriggerCause }
 				
+					def suiteToRun
 					if (isTimerTrigger) {
 						suiteToRun = 'regression'
 					} else if (isManualTrigger) {
@@ -73,6 +74,7 @@ pipeline {
 						suiteToRun = 'smoke'
 					}
 				
+					env.SUITE_TO_RUN = suiteToRun
 					// This will now correctly reflect the user's choice
 					echo "✅ Pipeline will run the '${suiteToRun}' suite."
 				}
