@@ -77,6 +77,7 @@ pipeline {
 					env.SUITE_TO_RUN = suiteToRun
 					// This will now correctly reflect the user's choice
 					echo "✅ Pipeline will run the '${env.SUITE_TO_RUN}' suite."
+					echo "DEBUG: params.SUITE_NAME='${params.SUITE_NAME}', env.SUITE_TO_RUN='${env.SUITE_TO_RUN}'"
 				}
             }
         }
