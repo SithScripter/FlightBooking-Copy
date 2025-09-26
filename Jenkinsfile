@@ -55,30 +55,44 @@ pipeline {
 //
 //                    echo "✅ Pipeline will run the '${env.SUITE_TO_RUN}' suite."
 //                }
+//				script {
+//					def causes = currentBuild.getBuildCauses()
+//					// This will now print all trigger descriptions, e.g., "Branch indexing, Started by user..."
+//					echo "🔍 Build was triggered by: ${causes*.shortDescription.join(', ')}"
+//				
+//					// Use .any{} to search the entire list of causes
+//					def isManualTrigger = causes.any { it instanceof hudson.model.Cause$UserIdCause }
+//					def isTimerTrigger = causes.any { it instanceof hudson.triggers.TimerTrigger$TimerTriggerCause }
+//				
+//					def suiteToRun
+//					if (isTimerTrigger) {
+//						suiteToRun = 'regression'
+//					} else if (isManualTrigger) {
+//						suiteToRun = params.SUITE_NAME
+//					} else {
+//						// Default for all other triggers (like a git push)
+//						suiteToRun = 'smoke'
+//					}
+//				
+//					env.SUITE_TO_RUN = suiteToRun
+//					// This will now correctly reflect the user's choice
+//					echo "✅ Pipeline will run the '${env.SUITE_TO_RUN}' suite."
+//					echo "DEBUG: params.SUITE_NAME='${params.SUITE_NAME}', env.SUITE_TO_RUN='${env.SUITE_TO_RUN}'"
+//				}
 				script {
 					def causes = currentBuild.getBuildCauses()
-					// This will now print all trigger descriptions, e.g., "Branch indexing, Started by user..."
-					echo "🔍 Build was triggered by: ${causes*.shortDescription.join(', ')}"
-				
-					// Use .any{} to search the entire list of causes
-					def isManualTrigger = causes.any { it instanceof hudson.model.Cause$UserIdCause }
-					def isTimerTrigger = causes.any { it instanceof hudson.triggers.TimerTrigger$TimerTriggerCause }
-				
-					def suiteToRun
-					if (isTimerTrigger) {
-						suiteToRun = 'regression'
-					} else if (isManualTrigger) {
-						suiteToRun = params.SUITE_NAME
-					} else {
-						// Default for all other triggers (like a git push)
-						suiteToRun = 'smoke'
-					}
-				
+					def descs  = causes*.shortDescription.join(', ')
+					echo "🔍 Build was triggered by: ${descs}"
+				  
+					def isTimerTrigger  = descs.toLowerCase().contains('timer') || descs.toLowerCase().contains('cron')
+					def isManualTrigger = descs.toLowerCase().contains('started by user')
+				  
+					def suiteToRun = isTimerTrigger ? 'regression' : (params.SUITE_NAME ?: 'smoke')
 					env.SUITE_TO_RUN = suiteToRun
-					// This will now correctly reflect the user's choice
+				  
 					echo "✅ Pipeline will run the '${env.SUITE_TO_RUN}' suite."
 					echo "DEBUG: params.SUITE_NAME='${params.SUITE_NAME}', env.SUITE_TO_RUN='${env.SUITE_TO_RUN}'"
-				}
+				  }
             }
         }
 
